@@ -17,13 +17,15 @@ def process_files(input_dir, output_dir, max_depth=None, current_depth=0):
                 suffix += 1
             try:
                 shutil.copy(entry.path, dest_path)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Ошибка при копировании файла {entry.path}: {e}")
         elif entry.is_dir() and (max_depth is None or current_depth < max_depth):
-            process_files(entry.path, output_dir, max_depth, current_depth + 1)
+            sub_output_dir = Path(output_dir) / entry.name
+            sub_output_dir.mkdir(parents=True, exist_ok=True)
+            process_files(entry.path, sub_output_dir, max_depth, current_depth + 1)
 
 if len(sys.argv) < 3:
-    print("Usage: python script.py input_dir output_dir [--max_depth N]")
+    print("Использование: python script.py input_dir output_dir [--max_depth N]")
     sys.exit(1)
 
 input_dir = sys.argv[1]
@@ -35,10 +37,10 @@ if "--max_depth" in sys.argv:
         max_depth_index = sys.argv.index("--max_depth")
         max_depth = int(sys.argv[max_depth_index + 1])
         if max_depth > 3:
-            print("Error: --max_depth cannot be greater than 3.")
+            print("Ошибка: --max_depth не может быть больше 3.")
             sys.exit(1)
     except (ValueError, IndexError):
-        print("Error: --max_depth must be an integer.")
+        print("Ошибка: --max_depth должен быть целым числом.")
         sys.exit(1)
 
 process_files(input_dir, output_dir, max_depth)
